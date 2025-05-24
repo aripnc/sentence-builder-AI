@@ -39,6 +39,11 @@ const items = [
     url: "/login",
     icon: Inbox,
   },
+  {
+    title: "My Words",
+    url: "/words",
+    icon: Inbox,
+  },
 ];
 
 export function AppSidebar() {

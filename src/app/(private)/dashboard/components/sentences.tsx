@@ -10,9 +10,6 @@ interface SentencesPageProps {
 export default function Sentences({ frases }: SentencesPageProps) {
   return (
     <Card className="mt-7">
-      <CardHeader>
-        <CardTitle>Frases</CardTitle>
-      </CardHeader>
       <CardContent className="flex flex-col space-y-3 px-2">
         {frases.map((s, i) => (
           <div key={i} className="space-y-1">

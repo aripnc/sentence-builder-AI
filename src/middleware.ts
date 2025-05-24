@@ -5,7 +5,7 @@ import {
 } from "next-auth/middleware";
 import { NextResponse } from "next/server";
 
-const protectedRoutes = ["/dashboard"];
+const protectedRoutes = ["/dashboard", "/words"];
 const publicRoutes = ["/login", "/register", "/"];
 
 const middleware = (req: NextRequestWithAuth) => {
@@ -36,5 +36,5 @@ const callbackOptions: NextAuthMiddlewareOptions = {};
 export default withAuth(middleware, callbackOptions);
 
 export const config = {
-  matcher: ["/dashboard"],
+  matcher: ["/dashboard", "/words"],
 };

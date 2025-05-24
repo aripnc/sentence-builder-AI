@@ -4,21 +4,21 @@ import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import prisma from "@/lib/prisma";
 import { getServerSession } from "next-auth";
 import type { NextRequestWithAuth } from "next-auth/middleware";
-import { NextResponse } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
 
 interface RequestProps {
-  input: string;
+  word: string;
   sentences: SentenceProps[];
 }
 
 export async function POST(req: NextRequestWithAuth) {
-  const { input, sentences } = (await req.json()) as RequestProps;
+  const { word, sentences } = (await req.json()) as RequestProps;
   const session = await getServerSession(authOptions);
   const user = session?.user as UserSessionProps;
 
   const wordCreated = await prisma.word.create({
     data: {
-      description: input,
+      description: word,
       userId: user.id,
     },
   });
@@ -39,4 +39,17 @@ export async function POST(req: NextRequestWithAuth) {
     { message: "Palavra criada com sucesso" },
     { status: 201 },
   );
+}
+
+export async function GET(req: NextRequest) {
+  const session = await getServerSession(authOptions);
+  const user = session?.user as UserSessionProps;
+
+  const words = await prisma.word.findMany({
+    where: {
+      userId: user.id,
+    },
+  });
+
+  return NextResponse.json({ data: words });
 }

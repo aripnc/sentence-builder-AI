@@ -1,7 +1,17 @@
 "use client";
 import type { SentenceProps } from "@/@types/sentence";
 import type { UserSessionProps } from "@/@types/user-session";
+import { CreateWord } from "@/app/http/create-word";
+import { GenerateSentences } from "@/app/http/generate-sentences";
 import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import {
   Form,
   FormControl,
@@ -14,59 +24,42 @@ import {
 import { Input } from "@/components/ui/input";
 import { api } from "@/lib/axios";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { Loader } from "lucide-react";
 import { useSession } from "next-auth/react";
 import { useState } from "react";
 import { useTransition } from "react";
 import { useForm } from "react-hook-form";
-import { toast } from "sonner";
 import { z } from "zod";
 import Sentences from "./components/sentences";
 import { SkeletonSentences } from "./components/skeleton-sentences";
 
-interface SentenceResponseProps {
-  data: SentenceProps[];
-}
-
 const formSchema = z.object({
-  input: z.string().nonempty({ message: "Informe uma palavra" }),
+  word: z.string().nonempty({ message: "Informe uma palavra" }),
 });
 
 export default function DashBoard() {
-  const { data: session } = useSession();
   const [palavra, setPalavra] = useState("");
   const [frases, setFrases] = useState<SentenceProps[]>();
-  const user = session?.user as UserSessionProps;
   const [isPending, startTransition] = useTransition();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      input: "",
+      word: "",
     },
   });
 
   const handleGenerate = async (data: z.infer<typeof formSchema>) => {
-    const { input } = data;
-    setPalavra(input);
+    const { word } = data;
+    setPalavra(word);
     setFrases([]);
 
     startTransition(async () => {
-      try {
-        const { data } = await api.post<SentenceResponseProps>("/chat", {
-          input,
-        });
-        setFrases(data.data);
+      const sentences = await GenerateSentences({ word });
+      setFrases(sentences);
 
-        await api.post("/word", { input, sentences: data.data });
-
-        console.log(data.data);
-        toast.success("Frases geradas com sucesso");
-      } catch (error) {
-        toast.error("Error ao gerar frases", {
-          description: `${error}`,
-        });
-        console.log("error");
-        console.log(error);
+      if (sentences) {
+        await CreateWord({ word, sentences });
       }
     });
   };
@@ -81,7 +74,7 @@ export default function DashBoard() {
           >
             <FormField
               control={form.control}
-              name="input"
+              name="word"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Palavra/Frase verbal</FormLabel>
@@ -103,7 +96,20 @@ export default function DashBoard() {
         </div>
       </Form>
 
-      {isPending ? <SkeletonSentences /> : <Sentences frases={frases ?? []} />}
+      {isPending ? (
+        <Dialog open>
+          <DialogContent>
+            <DialogTitle className="text-lg flex items-center gap-x-1">
+              Gerando frases <Loader className="animate-spin" />
+            </DialogTitle>
+            <DialogDescription>
+              Estamos gerando suas frases, por favor aguarde...
+            </DialogDescription>
+          </DialogContent>
+        </Dialog>
+      ) : (
+        <Sentences frases={frases ?? []} />
+      )}
     </div>
   );
 }
