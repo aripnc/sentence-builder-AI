@@ -1,8 +1,6 @@
 "use client";
-import type { SentenceProps } from "@/@types/sentence";
+import type { SentenceChatProps } from "@/@types/sentence-chat";
 import type { UserSessionProps } from "@/@types/user-session";
-import { CreateWord } from "@/app/http/create-word";
-import { GenerateSentences } from "@/app/http/generate-sentences";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -22,6 +20,8 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { CreateWord } from "@/http/create-word";
+import { GenerateSentences } from "@/http/generate-sentences";
 import { api } from "@/lib/axios";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader } from "lucide-react";
@@ -39,7 +39,7 @@ const formSchema = z.object({
 
 export default function DashBoard() {
   const [palavra, setPalavra] = useState("");
-  const [frases, setFrases] = useState<SentenceProps[]>();
+  const [frases, setFrases] = useState<SentenceChatProps[]>();
   const [isPending, startTransition] = useTransition();
 
   const form = useForm<z.infer<typeof formSchema>>({

@@ -1,4 +1,4 @@
-import type { SentenceProps } from "@/@types/sentence";
+import type { SentenceProps } from "@/@types/sentence-chat";
 import type { UserSessionProps } from "@/@types/user-session";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import prisma from "@/lib/prisma";
@@ -48,6 +48,9 @@ export async function GET(req: NextRequest) {
   const words = await prisma.word.findMany({
     where: {
       userId: user.id,
+    },
+    include: {
+      sentences: true,
     },
   });
 

@@ -1,10 +1,11 @@
 "use client";
-
 import type { UserSessionProps } from "@/@types/user-session";
 import type { Word } from "@/@types/word";
-import { FetchWords } from "@/app/http/fetch-words";
+import { FetchWords } from "@/http/fetch-words";
 import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
+import { columns } from "./components/data-table/columns";
+import { DataTable } from "./components/data-table/data-table";
 
 export default function Words() {
   const { data: session } = useSession();
@@ -14,27 +15,17 @@ export default function Words() {
   useEffect(() => {
     async function handleFetchWords() {
       const words = await FetchWords();
-      if (words) {
-        setWords(words);
-      }
+      setWords(words || []);
     }
+    console.log(words);
     handleFetchWords();
   }, [user]);
 
   return (
-    <div>
-      <h2>Pagina das palavras</h2>
-
-      {words && (
-        <div className="flex flex-col items-center space-y-3 text-muted-foreground">
-          {words.map((w, i) => (
-            <div key={i}>
-              <p>ID: {w.id}</p>
-              <p>descrição: {w.description}</p>
-            </div>
-          ))}
-        </div>
-      )}
+    <div className="h-full flex flex-col justify-center">
+      <div className="container mx-auto">
+        <DataTable columns={columns} data={words || []} />
+      </div>
     </div>
   );
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import type { SentenceProps } from "@/@types/sentence";
+import type { SentenceProps } from "@/@types/sentence-chat";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 interface SentencesPageProps {

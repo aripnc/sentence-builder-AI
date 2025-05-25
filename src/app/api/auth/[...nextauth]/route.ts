@@ -23,8 +23,9 @@ export const authOptions: NextAuthOptions = {
         const user = await prisma.user.findUnique({
           where: { email: email as string },
         });
+        console.log("userrrrrrrrrrrr", user);
 
-        if (!user) {
+        if (!user || user.password !== password) {
           throw new Error("Invalid credentials.");
         }
 
@@ -32,15 +33,15 @@ export const authOptions: NextAuthOptions = {
           id: user.id,
           name: user.name,
           email: user.email,
-          password: user.password,
         };
       },
     }),
   ],
   callbacks: {
     jwt: async ({ token, user }) => {
+      console.log("JWT Callback - user:", user); // debug
       if (user) {
-        token.sub = user.id;
+        token.id = user.id;
         token.name = user.name;
         token.email = user.email;
       }
@@ -48,7 +49,7 @@ export const authOptions: NextAuthOptions = {
     },
     session: async ({ session, token }) => {
       const user: UserSessionProps = {
-        id: token.sub as string,
+        id: token.id as string,
         name: token.name as string,
         email: token.email as string,
       };

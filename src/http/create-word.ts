@@ -1,4 +1,4 @@
-import type { SentenceProps } from "@/@types/sentence";
+import type { SentenceProps } from "@/@types/sentence-chat";
 import { api } from "@/lib/axios";
 import { AxiosError } from "axios";
 import { toast } from "sonner";
