@@ -7,7 +7,7 @@ const openai = new OpenAI({
 });
 
 export async function POST(req: NextRequest) {
-  const { word } = await req.json();
+  const { vocabulary, quantidade } = await req.json();
 
   try {
     const completion = await openai.chat.completions.create({
@@ -15,7 +15,7 @@ export async function POST(req: NextRequest) {
       messages: [
         {
           role: "user",
-          content: `Forme 4 frases em inglês com a palavra "${word}".
+          content: `Forme ${quantidade} frases em inglês com a palavra "${vocabulary}".
                Retorne apenas um JSON bruto no formato: [{"frase": "...", "traducao": "..."}, ...].
                Não escreva nenhuma explicação, apenas o JSON.`,
         },

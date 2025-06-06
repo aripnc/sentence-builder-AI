@@ -1,5 +1,4 @@
 "use client";
-
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -19,12 +18,13 @@ import {
 import { Input } from "@/components/ui/input";
 import { authClient } from "@/lib/auth-client";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { toast } from "sonner";
 import { z } from "zod";
 
 const formSchema = z.object({
+  name: z
+    .string({ required_error: "the name is required" })
+    .min(4, { message: "The name needs to be at least 4 characters" }),
   email: z
     .string({ required_error: "The email is required" })
     .email({ message: "The email must be valid" }),
@@ -33,63 +33,86 @@ const formSchema = z.object({
     .min(4, { message: "The password must be at least 4 characters" }),
 });
 
-export default function LoginForm() {
-  const [message, setMessage] = useState("");
-
+export default function SignUpForm() {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
+      name: "",
       email: "",
       password: "",
     },
   });
 
-  const handleLogin = async (values: z.infer<typeof formSchema>) => {
-    const { email, password } = values;
+  async function handleSignUp(values: z.infer<typeof formSchema>) {
+    const { name, email, password } = values;
     try {
-      const { data, error } = await authClient.signIn.email({
-        email,
-        password,
-        callbackURL: "/dashboard",
-      });
-      console.log(data);
+      const { data, error } = await authClient.signUp.email(
+        {
+          email,
+          password,
+          name,
+          callbackURL: "/dashboard",
+        },
+        {
+          onRequest: (ctx) => {
+            //show loading
+          },
+          onSuccess: (ctx) => {
+            console.log(ctx);
+          },
+          onError: (ctx) => {
+            // display the error message
+            alert(ctx.error.message);
+          },
+        },
+      );
     } catch (error) {
-      setMessage(`Login error: ${error}`);
+      console.log(error);
     }
-  };
-
-  const handleSignInWithGoogle = async () => {
-    const data = await authClient.signIn.social({
-      provider: "google",
-      callbackURL: "/dashboard",
-    });
-    console.log(data);
-  };
+  }
 
   return (
-    <Card className="border-muted">
+    <Card className="">
       <CardHeader>
-        <CardTitle className="text-2xl">Login</CardTitle>
-        <CardDescription>Entre na sua conta</CardDescription>
+        <CardTitle className="text-2xl">Criar conta</CardTitle>
+        <CardDescription>Cadastrar sua conta</CardDescription>
       </CardHeader>
 
       <CardContent>
         <Form {...form}>
           <div className="flex flex-col gap-6">
             <form
-              onSubmit={form.handleSubmit(handleLogin)}
+              onSubmit={form.handleSubmit(handleSignUp)}
               className="space-y-8"
             >
+              <FormField
+                control={form.control}
+                name="name"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Username</FormLabel>
+                    <FormControl>
+                      <Input
+                        className="bg-input"
+                        placeholder="Digite um nome"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
               <FormField
                 control={form.control}
                 name="email"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="font-semibold">Email</FormLabel>
+                    <FormLabel>Email</FormLabel>
                     <FormControl>
                       <Input
                         className="bg-input"
-                        placeholder="Digite seu email"
+                        placeholder="Digite um email"
                         {...field}
                       />
                     </FormControl>
@@ -102,12 +125,11 @@ export default function LoginForm() {
                 name="password"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="font-semibold">Password</FormLabel>
+                    <FormLabel>Password</FormLabel>
                     <FormControl>
                       <Input
                         className="bg-input"
-                        type="password"
-                        placeholder="Digite sua senha"
+                        placeholder="Crie uma senha"
                         {...field}
                       />
                     </FormControl>
@@ -116,46 +138,22 @@ export default function LoginForm() {
                 )}
               />
 
-              <Button
-                variant="default"
-                className="w-full text-base"
-                type="submit"
-              >
-                Entrar
+              <Button variant="default" className="w-full" type="submit">
+                Cadastrar
               </Button>
 
-              <div className="space-y-3">
-                <div className="w-full flex items-center">
-                  <span className="w-full text-center font-semibold text-base">
-                    Ou continue com
-                  </span>
-                </div>
-                <Button
-                  variant="destructive"
-                  className="text-base text-white w-full"
-                  onClick={handleSignInWithGoogle}
-                >
-                  Entrar com Google
-                </Button>
-              </div>
-
               <div className="text-center text-lg">
-                Não possui uma conta?{" "}
+                Já tem uma conta?{" "}
                 <a
-                  href="/signup"
+                  href="/login"
                   className="text-primary underline underline-offset-4"
                 >
-                  Cadastrar conta
+                  Login
                 </a>
               </div>
             </form>
           </div>
         </Form>
-        {message && (
-          <div className="w-full text-center text-lg text-red-500">
-            {message}
-          </div>
-        )}
       </CardContent>
     </Card>
   );

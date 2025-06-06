@@ -1,40 +1,55 @@
-import {
-  type NextAuthMiddlewareOptions,
-  type NextRequestWithAuth,
-  withAuth,
-} from "next-auth/middleware";
-import { NextResponse } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
 
-const protectedRoutes = ["/dashboard", "/words"];
-const publicRoutes = ["/login", "/register", "/"];
+const publicRoutes = [
+  { path: "/login", whenAuthenticated: "redirect" },
+  { path: "/signup", whenAuthenticated: "redirect" },
+] as const;
 
-const middleware = (req: NextRequestWithAuth) => {
-  console.log("[MIDDLEWARE_NEXTAUTH_TOKEN]: ", req.nextauth.token);
+const REDIRECT_WHEN_NOT_AUTHENTICATED = "/login";
 
-  const path = req.nextUrl.pathname;
-  const isProtectedRoute = protectedRoutes.includes(path);
-  const isPublicRoute = publicRoutes.includes(path);
+export function middleware(req: NextRequest) {
+  console.log(
+    "[MIDDLEWARE_SESSION_TOKEN]: ",
+    req.cookies.get("better-auth.session_token"),
+  );
 
-  const session = req.nextauth.token;
+  const currentPath = req.nextUrl.pathname;
+  const isPublicRoute = publicRoutes.find(
+    (route) => route.path === currentPath,
+  );
 
-  if (isProtectedRoute && !session?.sub) {
-    return NextResponse.redirect(new URL("/login", req.nextUrl));
+  const authtoken = req.cookies.get("better-auth.session_token");
+
+  if (!authtoken && isPublicRoute) {
+    return NextResponse.next();
   }
 
-  if (
-    isPublicRoute &&
-    session?.sub &&
-    !req.nextUrl.pathname.startsWith("/dashboard")
-  ) {
-    return NextResponse.redirect(new URL("/dashboard", req.nextUrl));
+  if (!authtoken && !isPublicRoute) {
+    const redirectUrl = req.nextUrl.clone();
+
+    redirectUrl.pathname = REDIRECT_WHEN_NOT_AUTHENTICATED;
+
+    return NextResponse.redirect(redirectUrl);
+  }
+
+  if (authtoken && isPublicRoute) {
+    const redirectUrl = req.nextUrl.clone();
+
+    redirectUrl.pathname = "/dashboard";
+
+    return NextResponse.redirect(redirectUrl);
+  }
+
+  if (authtoken && !isPublicRoute) {
+    // (checar se jwt esta expirado)
+    return NextResponse.next();
   }
 
   return NextResponse.next();
-};
-const callbackOptions: NextAuthMiddlewareOptions = {};
-
-export default withAuth(middleware, callbackOptions);
+}
 
 export const config = {
-  matcher: ["/dashboard", "/words"],
+  matcher: [
+    "/((?!api|_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt).*)",
+  ],
 };

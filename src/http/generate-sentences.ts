@@ -1,19 +1,24 @@
-import type { SentenceProps } from "@/@types/sentence-chat";
+import type { SentenceChatProps } from "@/@types/sentence-chat";
 import { api } from "@/lib/axios";
 import { toast } from "sonner";
 
-interface GenerateSentencesReqProps {
-  word: string;
+interface GenerateSentencesRequest {
+  vocabulary: string;
+  quantidade: string;
 }
 
-interface GenerateSentencesResProps {
-  data: SentenceProps[];
+interface GenerateSentencesResponse {
+  data: SentenceChatProps[];
 }
 
-export async function GenerateSentences({ word }: GenerateSentencesReqProps) {
+export async function GenerateSentences({
+  vocabulary,
+  quantidade,
+}: GenerateSentencesRequest) {
   try {
-    const { data } = await api.post<GenerateSentencesResProps>("/chat", {
-      word,
+    const { data } = await api.post<GenerateSentencesResponse>("/chat", {
+      vocabulary,
+      quantidade,
     });
 
     toast.success("Frases geradas com sucesso");
