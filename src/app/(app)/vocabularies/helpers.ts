@@ -7,6 +7,12 @@ export const vocabulariesType = [
   { value: "Adverb", name: "Advérbio" },
 ];
 
+export const vocabulariesDifficulty = [
+  { value: "MEDIUM", name: "Médio" },
+  { value: "EASY", name: "Fácil" },
+  { value: "HARD", name: "Difícil" },
+];
+
 export const sentencesQuantity = [
   { value: "1", name: "1" },
   { value: "2", name: "2" },

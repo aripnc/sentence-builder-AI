@@ -18,7 +18,9 @@ import {
 import { Input } from "@/components/ui/input";
 import { authClient } from "@/lib/auth-client";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 import { z } from "zod";
 
 const formSchema = z.object({
@@ -34,6 +36,7 @@ const formSchema = z.object({
 });
 
 export default function SignUpForm() {
+  const [error, setError] = useState<string>();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -45,30 +48,23 @@ export default function SignUpForm() {
 
   async function handleSignUp(values: z.infer<typeof formSchema>) {
     const { name, email, password } = values;
-    try {
-      const { data, error } = await authClient.signUp.email(
-        {
-          email,
-          password,
-          name,
-          callbackURL: "/dashboard",
+
+    await authClient.signUp.email(
+      {
+        email,
+        password,
+        name,
+        callbackURL: "/dashboard",
+      },
+      {
+        onSuccess: (ctx) => {
+          toast.success("Conta criada com sucesso!");
         },
-        {
-          onRequest: (ctx) => {
-            //show loading
-          },
-          onSuccess: (ctx) => {
-            console.log(ctx);
-          },
-          onError: (ctx) => {
-            // display the error message
-            alert(ctx.error.message);
-          },
+        onError: (ctx) => {
+          setError(ctx.error.message);
         },
-      );
-    } catch (error) {
-      console.log(error);
-    }
+      },
+    );
   }
 
   return (
@@ -141,6 +137,10 @@ export default function SignUpForm() {
               <Button variant="default" className="w-full" type="submit">
                 Cadastrar
               </Button>
+
+              <div className="w-full text-center text-base text-destructive">
+                {error}
+              </div>
 
               <div className="text-center text-lg">
                 Já tem uma conta?{" "}

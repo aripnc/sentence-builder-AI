@@ -18,7 +18,7 @@ export default function Dashboard() {
       const data = await FetchVocabularies();
       setVocabularies(data || []);
     });
-  }, [session]);
+  }, []);
 
   return (
     <div className="h-full flex flex-col justify-center">

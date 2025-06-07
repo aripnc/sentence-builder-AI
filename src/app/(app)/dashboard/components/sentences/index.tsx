@@ -13,7 +13,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Info } from "lucide-react";
+import { FileSearch } from "lucide-react";
 
 interface SentencesComponentProps {
   sentences: SentenceProps[];
@@ -25,7 +25,7 @@ export function SentencesComponent({ sentences }: SentencesComponentProps) {
       <Dialog>
         <DialogTrigger asChild>
           <Button variant="ghost" size="icon">
-            <Info size={16} />
+            <FileSearch size={16} />
           </Button>
         </DialogTrigger>
         <DialogContent className="sm:min-w-[1200px] min-h-[200px]">

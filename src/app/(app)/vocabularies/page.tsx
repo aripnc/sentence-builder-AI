@@ -39,10 +39,10 @@ import { vocabulariesType } from "./helpers";
 import { sentencesQuantity } from "./helpers";
 
 const formSchema = z.object({
-  vocabulary: z.string({ required_error: "Insira um vocabulário" }),
-  tipo: z.string({ required_error: "Selecione um tipo" }),
-  quantidade: z.string({
-    required_error: "Selecione uma quantidade de frases a serem geradas",
+  vocabulary: z.string().nonempty({ message: "Insira um vocabulário" }),
+  tipo: z.string().nonempty({ message: "Selecione um tipo" }),
+  quantidade: z.string().nonempty({
+    message: "Selecione uma quantidade de frases a serem geradas",
   }),
 });
 

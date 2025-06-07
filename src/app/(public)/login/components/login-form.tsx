@@ -21,7 +21,6 @@ import { authClient } from "@/lib/auth-client";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { toast } from "sonner";
 import { z } from "zod";
 
 const formSchema = z.object({
@@ -34,7 +33,7 @@ const formSchema = z.object({
 });
 
 export default function LoginForm() {
-  const [message, setMessage] = useState("");
+  const [error, setError] = useState("");
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -46,15 +45,14 @@ export default function LoginForm() {
 
   const handleLogin = async (values: z.infer<typeof formSchema>) => {
     const { email, password } = values;
-    try {
-      const { data, error } = await authClient.signIn.email({
-        email,
-        password,
-        callbackURL: "/dashboard",
-      });
-      console.log(data);
-    } catch (error) {
-      setMessage(`Login error: ${error}`);
+    const { data, error } = await authClient.signIn.email({
+      email,
+      password,
+      callbackURL: "/dashboard",
+    });
+
+    if (error) {
+      setError(`Login error: ${error.message}`);
     }
   };
 
@@ -63,7 +61,6 @@ export default function LoginForm() {
       provider: "google",
       callbackURL: "/dashboard",
     });
-    console.log(data);
   };
 
   return (
@@ -124,6 +121,10 @@ export default function LoginForm() {
                 Entrar
               </Button>
 
+              <div className="w-full text-center text-base text-destructive">
+                {error}
+              </div>
+
               <div className="space-y-3">
                 <div className="w-full flex items-center">
                   <span className="w-full text-center font-semibold text-base">
@@ -151,11 +152,6 @@ export default function LoginForm() {
             </form>
           </div>
         </Form>
-        {message && (
-          <div className="w-full text-center text-lg text-red-500">
-            {message}
-          </div>
-        )}
       </CardContent>
     </Card>
   );

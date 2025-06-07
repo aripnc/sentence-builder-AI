@@ -1,4 +1,5 @@
 import type { SentenceChatProps } from "@/@types/sentence-chat";
+import type { Vocabulary } from "@/@types/vocabulary";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { headers } from "next/headers";
@@ -12,7 +13,9 @@ type TypeVocabulary =
   | "Adjective"
   | "Adverb";
 
-interface RequestProps {
+type DificultyVocabulary = "MEDIUM" | "HARD" | "EASY";
+
+interface RequestPostProps {
   vocabulary: string;
   tipo: TypeVocabulary;
   sentences: SentenceChatProps[];
@@ -22,7 +25,8 @@ export async function POST(req: NextRequest) {
   const session = await auth.api.getSession({
     headers: await headers(),
   });
-  const { vocabulary, tipo, sentences } = (await req.json()) as RequestProps;
+  const { vocabulary, tipo, sentences } =
+    (await req.json()) as RequestPostProps;
   const user = session?.user;
 
   if (user) {
@@ -68,6 +72,9 @@ export async function GET(req: NextRequest) {
       where: {
         userId: user.id,
       },
+      orderBy: {
+        createdAt: "desc",
+      },
       include: {
         sentences: true,
       },
@@ -75,4 +82,50 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json({ data: vocabularies });
   }
+}
+
+interface RequestUpdateProps {
+  vocabulary: Vocabulary;
+}
+
+export async function PUT(req: NextRequest) {
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
+  const user = session?.user;
+
+  if (!user) {
+    return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+  }
+
+  const { vocabulary } = (await req.json()) as RequestUpdateProps;
+
+  const existentVocabulary = await prisma.vocabulary.findUnique({
+    where: {
+      id: vocabulary.id,
+    },
+  });
+
+  const difficulty = vocabulary.difficulty as DificultyVocabulary;
+  const type = vocabulary.type as TypeVocabulary;
+
+  if (existentVocabulary) {
+    existentVocabulary.difficulty = difficulty
+      ? difficulty
+      : existentVocabulary.difficulty;
+    existentVocabulary.type = type ? type : existentVocabulary.type;
+
+    await prisma.vocabulary.update({
+      where: {
+        id: existentVocabulary.id,
+      },
+      data: {
+        ...existentVocabulary,
+      },
+    });
+  }
+
+  return NextResponse.json({
+    message: `vocabulário: ${vocabulary.description} atualizado com sucesso.`,
+  });
 }
