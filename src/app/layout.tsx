@@ -25,8 +25,8 @@ export default function RootLayout({
         >
           {children}
         </ThemeProvider>
+        <Toaster theme="dark" position="top-right" />
       </body>
-      <Toaster theme="dark" position="top-right" />
     </html>
   );
 }

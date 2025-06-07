@@ -106,26 +106,24 @@ export async function PUT(req: NextRequest) {
     },
   });
 
-  const difficulty = vocabulary.difficulty as DificultyVocabulary;
-  const type = vocabulary.type as TypeVocabulary;
+  const newDifficulty = vocabulary.difficulty as DificultyVocabulary;
+  const newType = vocabulary.type as TypeVocabulary;
 
   if (existentVocabulary) {
-    existentVocabulary.difficulty = difficulty
-      ? difficulty
-      : existentVocabulary.difficulty;
-    existentVocabulary.type = type ? type : existentVocabulary.type;
-
     await prisma.vocabulary.update({
       where: {
         id: existentVocabulary.id,
       },
       data: {
-        ...existentVocabulary,
+        difficulty: newDifficulty
+          ? newDifficulty
+          : existentVocabulary.difficulty,
+        type: newType ? newType : existentVocabulary.type,
       },
     });
   }
 
   return NextResponse.json({
-    message: `vocabulário: ${vocabulary.description} atualizado com sucesso.`,
+    message: `vocabulário: ${existentVocabulary?.description} atualizado com sucesso.`,
   });
 }

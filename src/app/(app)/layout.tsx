@@ -1,7 +1,10 @@
+"use client";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { AppSidebar } from "./components/app-sidebar";
 import { ModeToggle } from "./components/mode-toggle";
 
+const queryClient = new QueryClient();
 export default function AppLayout({
   children,
 }: {
@@ -15,7 +18,9 @@ export default function AppLayout({
           <SidebarTrigger />
           <ModeToggle />
         </div>
-        {children}
+        <QueryClientProvider client={queryClient}>
+          {children}
+        </QueryClientProvider>
       </main>
     </SidebarProvider>
   );
