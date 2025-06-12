@@ -2,28 +2,24 @@ import type { SentenceChatProps } from "@/@types/sentence-chat";
 import { api } from "@/lib/axios";
 import { toast } from "sonner";
 
-interface CreateVocabularyRequest {
-  vocabulary: string;
-  tipo: string;
+interface GenerateSentencesRequest {
+  vocabularyId: string;
   sentences: SentenceChatProps[];
 }
 
-export async function CreateVocabulary({
-  vocabulary,
-  tipo,
+export async function CreateSentences({
+  vocabularyId,
   sentences,
-}: CreateVocabularyRequest) {
+}: GenerateSentencesRequest) {
   try {
-    await api.post("/vocabulary", {
-      vocabulary,
-      tipo,
+    await api.post("/sentences", {
+      vocabularyId,
       sentences,
     });
   } catch (error) {
     console.error(error);
-    toast.error("Error ao criar vocabulary e frases", {
+    toast.error("Error ao gerar frases", {
       description: `${error}`,
     });
-    return error;
   }
 }

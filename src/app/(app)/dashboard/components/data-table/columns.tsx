@@ -1,8 +1,7 @@
 "use client";
 import type { Vocabulary } from "@/@types/vocabulary";
 import type { ColumnDef } from "@tanstack/react-table";
-import EditForm from "../edit-form";
-import { SentencesComponent } from "../sentences";
+import RowActions from "./row-actions";
 
 export const columns: ColumnDef<Vocabulary>[] = [
   {
@@ -15,13 +14,15 @@ export const columns: ColumnDef<Vocabulary>[] = [
     cell: ({ row }) => {
       const dificulty = row.getValue("difficulty");
       if (dificulty === "MEDIUM") {
-        return <div className="text-yellow-500">{dificulty}</div>;
+        return <div className="text-yellow-500 font-semibold">{dificulty}</div>;
       }
       if (dificulty === "EASY") {
-        return <div className="text-green-700">{dificulty}</div>;
+        return <div className="text-green-700 font-semibold">{dificulty}</div>;
       }
       if (dificulty === "HARD") {
-        return <div className="text-destructive">{dificulty}</div>;
+        return (
+          <div className="text-destructive font-semibold">{dificulty}</div>
+        );
       }
     },
   },
@@ -33,13 +34,8 @@ export const columns: ColumnDef<Vocabulary>[] = [
     accessorKey: "action",
     header: "Ações",
     cell: ({ row }) => {
-      const vocabulary = row.original;
-      return (
-        <div className="flex gap-1">
-          <SentencesComponent sentences={vocabulary.sentences} />
-          <EditForm vocabulary={vocabulary} />
-        </div>
-      );
+      const data = row.original;
+      return <RowActions vocabulary={data} />;
     },
   },
 ];

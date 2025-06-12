@@ -1,7 +1,7 @@
 "use client";
 import type { Vocabulary } from "@/@types/vocabulary";
-import { vocabulariesType } from "@/app/(app)/vocabularies/helpers";
-import { vocabulariesDifficulty } from "@/app/(app)/vocabularies/helpers";
+import { vocabulariesType } from "@/app/(app)/vocabularies/components/helpers";
+import { vocabulariesDifficulty } from "@/app/(app)/vocabularies/components/helpers";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -26,8 +26,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { FetchVocabularies } from "@/http/fetch-vocabularies";
-import { updateVocabulary } from "@/http/update-vocabulary";
+import { updateVocabulary } from "@/http/vocabulary/update-vocabulary";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   queryOptions,
@@ -35,7 +34,6 @@ import {
   useQueryClient,
 } from "@tanstack/react-query";
 import { Edit2Icon } from "lucide-react";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -63,27 +61,29 @@ export default function EditForm({ vocabulary }: EditFormProps) {
   const { watch } = form;
   const difficulty = watch("difficulty");
   const type = watch("type");
-  const router = useRouter();
 
   const mutation = useMutation({
     mutationFn: updateVocabulary,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["vocabulary"] });
+    },
+    onError: (error) => {
+      console.log("Update error:", error);
+    },
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     const { difficulty, type } = values;
-    vocabulary.difficulty = difficulty ? difficulty : vocabulary.difficulty;
-    vocabulary.type = type ? type : vocabulary.type;
+    const updatedVocabulary = {
+      ...vocabulary,
+      difficulty,
+      type,
+    };
 
     await mutation.mutateAsync({
-      vocabulary,
+      vocabulary: updatedVocabulary,
     });
 
-    await queryClient.invalidateQueries(
-      queryOptions({
-        queryKey: ["vocabularies"],
-        queryFn: FetchVocabularies,
-      }),
-    );
     setIsOpen(false);
   }
 
@@ -94,7 +94,7 @@ export default function EditForm({ vocabulary }: EditFormProps) {
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
         <DialogTrigger>
           <Button variant="ghost" size="icon">
-            <Edit2Icon size={16} />
+            <Edit2Icon size={16} className="text-emerald-600" />
           </Button>
         </DialogTrigger>
         <DialogContent className="sm:min-w-[700px]">

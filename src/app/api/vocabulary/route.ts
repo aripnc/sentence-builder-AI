@@ -29,32 +29,15 @@ export async function POST(req: NextRequest) {
     (await req.json()) as RequestPostProps;
   const user = session?.user;
 
-  if (user) {
-    const vocabularyCreated = await prisma.vocabulary.create({
-      data: {
-        description: vocabulary,
-        type: tipo,
-        userId: user.id,
-      },
-    });
+  const vocabularyCreated = await prisma.vocabulary.create({
+    data: {
+      description: vocabulary,
+      type: tipo,
+      userId: user?.id,
+    },
+  });
 
-    const mapSentences = sentences.map((s) => {
-      return {
-        description: s.frase,
-        translation: s.traducao,
-        vocabularyId: vocabularyCreated.id,
-      };
-    });
-
-    await prisma.sentence.createMany({
-      data: [...mapSentences],
-    });
-  }
-
-  return NextResponse.json(
-    { message: "Vocabulário criada com sucesso" },
-    { status: 201 },
-  );
+  return NextResponse.json({ data: vocabularyCreated }, { status: 201 });
 }
 
 export async function GET(req: NextRequest) {
@@ -124,6 +107,6 @@ export async function PUT(req: NextRequest) {
   }
 
   return NextResponse.json({
-    message: `vocabulário: ${existentVocabulary?.description} atualizado com sucesso.`,
+    message: `vocabulary: ${vocabulary.description} atualizaco com sucesso`,
   });
 }

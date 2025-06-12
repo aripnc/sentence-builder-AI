@@ -49,7 +49,7 @@
   --card-foreground: 337 0% 3.94%;
   --popover: hsl(338 0% 100%);
   --popover-foreground: 337 0% 3.94%;
-  --primary: hsl(221.1,50.3%,62.9%);
+  --primary: hsl(221, 50%, 63%);
   --primary-foreground: hsl(338 0% 100%);
   --secondary: hsl(221,50.2%,48%);
   --secondary-foreground: hsl(338 0% 100%);

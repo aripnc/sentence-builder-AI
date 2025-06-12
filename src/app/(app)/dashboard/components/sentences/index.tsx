@@ -25,7 +25,7 @@ export function SentencesComponent({ sentences }: SentencesComponentProps) {
       <Dialog>
         <DialogTrigger asChild>
           <Button variant="ghost" size="icon">
-            <FileSearch size={16} />
+            <FileSearch size={16} className="text-blue-600" />
           </Button>
         </DialogTrigger>
         <DialogContent className="sm:min-w-[1200px] min-h-[200px]">

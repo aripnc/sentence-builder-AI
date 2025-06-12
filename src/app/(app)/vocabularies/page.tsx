@@ -26,17 +26,18 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { CreateVocabulary } from "@/http/create-vocabulary";
-import { GenerateSentences } from "@/http/generate-sentences";
+import { CreateSentences } from "@/http/sentences/create-sentences";
+import { GenerateSentences } from "@/http/sentences/generate-sentences";
+import { CreateVocabulary } from "@/http/vocabulary/create-vocabulary";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader } from "lucide-react";
 import { useState } from "react";
 import { useTransition } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
+import { vocabulariesType } from "./components/helpers";
+import { sentencesQuantity } from "./components/helpers";
 import Sentences from "./components/sentences";
-import { vocabulariesType } from "./helpers";
-import { sentencesQuantity } from "./helpers";
 
 const formSchema = z.object({
   vocabulary: z.string().nonempty({ message: "Insira um vocabulário" }),
@@ -47,7 +48,7 @@ const formSchema = z.object({
 });
 
 export default function Vocabularies() {
-  const [frases, setFrases] = useState<SentenceChatProps[]>();
+  const [frases, setFrases] = useState<SentenceChatProps[] | null>(null);
 
   const [isPending, startTransition] = useTransition();
 
@@ -61,123 +62,149 @@ export default function Vocabularies() {
   });
 
   const handleGenerate = async (data: z.infer<typeof formSchema>) => {
-    const { vocabulary, tipo, quantidade } = data;
-    setFrases([]);
+    const { vocabulary, quantidade } = data;
+    setFrases(null);
 
     startTransition(async () => {
       const sentences = await GenerateSentences({ vocabulary, quantidade });
-      setFrases(sentences);
 
-      if (sentences) {
-        await CreateVocabulary({ vocabulary, tipo, sentences });
-      }
+      setFrases(sentences!);
     });
   };
 
+  const handleSaveVocabulary = async (formData: z.infer<typeof formSchema>) => {
+    const { vocabulary, tipo } = formData;
+    const data = await CreateVocabulary({ vocabulary, tipo });
+    const vocabularyId = data?.id as string;
+    if (frases) {
+      await CreateSentences({ vocabularyId, sentences: frases });
+    }
+    handleClear();
+  };
+
+  const handleClear = async () => {
+    form.reset();
+    setFrases(null);
+  };
+
   return (
-    <div className="mt-10 w-[800px] self-center p-2">
-      <Form {...form}>
-        <div>
-          <form
-            onSubmit={form.handleSubmit(handleGenerate)}
-            className="space-y-8"
-          >
-            <FormField
-              control={form.control}
-              name="vocabulary"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-base">Vocabulário</FormLabel>
-                  <FormControl>
-                    <Input
-                      placeholder="Insira aqui sua palavra em inglês"
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="tipo"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-base">Tipo</FormLabel>
-                  <Select
-                    onValueChange={field.onChange}
-                    defaultValue={field.value}
-                  >
-                    <FormControl className="w-full">
-                      <SelectTrigger>
-                        <SelectValue placeholder="Selecione um tipo" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {vocabulariesType.map((v, i) => (
-                        <SelectItem key={i} value={v.value}>
-                          {v.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="quantidade"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-base">Quantidade</FormLabel>
-                  <Select
-                    onValueChange={field.onChange}
-                    defaultValue={field.value}
-                  >
-                    <FormControl className="w-full">
-                      <SelectTrigger>
-                        <SelectValue placeholder="Selecione uma quantidade de frases a gerar" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {sentencesQuantity.map((s, i) => (
-                        <SelectItem key={i} value={s.value}>
-                          {s.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <Button
-              className="w-full text-base"
-              type="submit"
-              disabled={isPending}
+    <>
+      <div className="mt-10 w-[800px] border rounded-xl self-center py-3 px-4">
+        <Form {...form}>
+          <div>
+            <form
+              onSubmit={form.handleSubmit(handleGenerate)}
+              className="space-y-8"
             >
-              {isPending ? "Gerando as frases" : "Gerar frases"}
-            </Button>
-          </form>
-        </div>
-      </Form>
+              <FormField
+                control={form.control}
+                name="vocabulary"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-base">Vocabulário</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder="Insira aqui sua palavra em inglês"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="tipo"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-base">Tipo</FormLabel>
+                    <Select onValueChange={field.onChange} value={field.value}>
+                      <FormControl className="w-full">
+                        <SelectTrigger>
+                          <SelectValue placeholder="Selecione um tipo" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {vocabulariesType.map((v, i) => (
+                          <SelectItem key={i} value={v.value}>
+                            {v.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="quantidade"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-base">Quantidade</FormLabel>
+                    <Select onValueChange={field.onChange} value={field.value}>
+                      <FormControl className="w-full">
+                        <SelectTrigger>
+                          <SelectValue placeholder="Selecione uma quantidade de frases a gerar" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {sentencesQuantity.map((s, i) => (
+                          <SelectItem key={i} value={s}>
+                            {s}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-      {isPending ? (
-        <Dialog open>
-          <DialogContent>
-            <DialogTitle className="text-lg flex items-center gap-x-1">
-              Gerando frases <Loader className="animate-spin" />
-            </DialogTitle>
-            <DialogDescription>
-              Estamos gerando as frases, por favor aguarde...
-            </DialogDescription>
-          </DialogContent>
-        </Dialog>
-      ) : (
-        <Sentences frases={frases ?? []} />
-      )}
-    </div>
+              <div className="flex justify-end gap-x-4 w-full">
+                <Button
+                  className="text-base"
+                  size="lg"
+                  type="submit"
+                  disabled={isPending}
+                >
+                  {isPending ? "Gerando as frases" : "Gerar frases"}
+                </Button>
+                <Button size="lg" variant="outline" onClick={handleClear}>
+                  Clear
+                </Button>
+              </div>
+            </form>
+          </div>
+        </Form>
+      </div>
+      <div className="mt-10 w-[800px] self-center">
+        {isPending ? (
+          <Dialog open>
+            <DialogContent>
+              <DialogTitle className="text-lg flex items-center gap-x-1">
+                Gerando frases <Loader className="animate-spin" />
+              </DialogTitle>
+              <DialogDescription>
+                Estamos gerando as frases, por favor aguarde...
+              </DialogDescription>
+            </DialogContent>
+          </Dialog>
+        ) : (
+          <div className="space-y-5">
+            <Sentences frases={frases ?? []} />
+            {frases && (
+              <Button
+                className="w-full text-base"
+                variant="outline"
+                onClick={form.handleSubmit(handleSaveVocabulary)}
+              >
+                Salvar
+              </Button>
+            )}
+          </div>
+        )}
+      </div>
+    </>
   );
 }
