@@ -89,7 +89,7 @@ export default function Vocabularies() {
 
   return (
     <>
-      <div className="mt-10 w-[800px] border rounded-xl self-center py-3 px-4">
+      <div className="mt-20 w-[800px] border rounded-xl self-center py-3 px-4">
         <Form {...form}>
           <div>
             <form

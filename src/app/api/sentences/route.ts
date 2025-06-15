@@ -24,3 +24,16 @@ export async function POST(req: NextRequest) {
 
   return NextResponse.json({ status: 201 });
 }
+
+export async function GET(req: NextRequest) {
+  const data = await prisma.sentence.findMany({
+    where: {
+      nextReview: {
+        lte: new Date(),
+      },
+    },
+    // take: 10
+  });
+
+  return NextResponse.json({ data });
+}

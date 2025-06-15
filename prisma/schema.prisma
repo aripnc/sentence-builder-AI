@@ -116,6 +116,12 @@ model Sentence{
   vocabulary Vocabulary? @relation(fields: [vocabularyId], references: [id])
   vocabularyId String?
 
+  nextReview DateTime @default(now())
+  interval Int @default(1)
+  repetitions Int @default(0)
+  fator Float @default(2.5)
+
   @@map("sentences")
+
 
 }

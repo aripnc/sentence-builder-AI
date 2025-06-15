@@ -33,6 +33,11 @@ const items = [
     icon: SquareRoundCorner,
   },
   {
+    title: "Revisar",
+    url: "/review",
+    icon: SquareRoundCorner,
+  },
+  {
     title: "Favoritos",
     url: "/words",
     icon: FolderHeart,

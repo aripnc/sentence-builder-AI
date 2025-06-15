@@ -26,6 +26,7 @@
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
+  --color-success: var(--success);
   --color-chart-1: var(--chart-1);
   --color-chart-2: var(--chart-2);
   --color-chart-3: var(--chart-3);
@@ -61,6 +62,7 @@
   --border: hsl(345 0% 89.8%);
   --input: hsl(0,0%,95.3%);
   --ring: hsl(336 0% 63%);
+  --success: hsl(142.1 76.2% 36.3%);
   --chart-1: hsl(23 100% 44.4%);
   --chart-2: hsl(175 100% 27.7%);
   --chart-3: hsl(196 72.1% 22.9%);
@@ -95,6 +97,7 @@
   --border: hsl(338 0% 100% / 0.1);
   --input: hsl(338 0% 100% / 0.15);
   --ring: hsl(345 0% 45.2%);
+  --success: hsl(142.1 76.2% 25%);
   --chart-1: hsl(225 84.1% 49%);
   --chart-2: hsl(162 100% 35%);
   --chart-3: hsl(39.3 100% 46.2%);

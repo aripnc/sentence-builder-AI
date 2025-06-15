@@ -3,6 +3,8 @@ import type { Vocabulary } from "@/@types/vocabulary";
 import type { ColumnDef } from "@tanstack/react-table";
 import RowActions from "./row-actions";
 
+import { Badge } from "@/components/ui/badge";
+
 export const columns: ColumnDef<Vocabulary>[] = [
   {
     accessorKey: "description",
@@ -14,14 +16,24 @@ export const columns: ColumnDef<Vocabulary>[] = [
     cell: ({ row }) => {
       const dificulty = row.getValue("difficulty");
       if (dificulty === "MEDIUM") {
-        return <div className="text-yellow-500 font-semibold">{dificulty}</div>;
+        return (
+          <Badge variant="outline" className="font-semibold">
+            {dificulty}
+          </Badge>
+        );
       }
       if (dificulty === "EASY") {
-        return <div className="text-green-700 font-semibold">{dificulty}</div>;
+        return (
+          <Badge variant="success" className="font-semibold">
+            {dificulty}
+          </Badge>
+        );
       }
       if (dificulty === "HARD") {
         return (
-          <div className="text-destructive font-semibold">{dificulty}</div>
+          <Badge variant="destructive" className="font-semibold">
+            {dificulty}
+          </Badge>
         );
       }
     },
