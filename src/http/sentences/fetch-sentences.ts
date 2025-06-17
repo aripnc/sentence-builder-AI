@@ -1,6 +1,6 @@
 import type { SentenceProps } from "@/@types/vocabulary";
+import { toast } from "@/hooks/use-toast";
 import { api } from "@/lib/axios";
-import { toast } from "sonner";
 
 interface FetchResponseProps {
   data: SentenceProps[];
@@ -13,8 +13,9 @@ export async function FetchSentences() {
     return data.data;
   } catch (error) {
     console.error(error);
-    toast.error("Error ao consultar frases", {
-      description: `${error}`,
+    toast({
+      title: "Erro ao consultar frases",
+      variant: "destructive",
     });
   }
 }

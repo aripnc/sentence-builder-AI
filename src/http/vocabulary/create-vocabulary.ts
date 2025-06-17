@@ -1,8 +1,6 @@
 import type { Vocabulary } from "@/@types/vocabulary";
+import { toast } from "@/hooks/use-toast";
 import { api } from "@/lib/axios";
-import { queryOptions } from "@tanstack/react-query";
-import { AxiosError } from "axios";
-import { toast } from "sonner";
 
 interface CreateVocabularyRequest {
   vocabulary: string;
@@ -22,12 +20,16 @@ export async function CreateVocabulary({
       vocabulary,
       tipo,
     });
-
+    toast({
+      title: "Vocabulary criado com sucesso",
+      variant: "success",
+    });
     return data.data;
   } catch (error) {
     console.error(error);
-    toast.error("Error ao criar vocabulary e frases", {
-      description: `${error}`,
+    toast({
+      title: "Erro ao criar vocabulary",
+      variant: "destructive",
     });
   }
 }

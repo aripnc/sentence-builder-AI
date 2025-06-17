@@ -15,8 +15,8 @@ export default function AppLayout({
     <SidebarProvider>
       <AppSidebar />
       <SidebarInset>
-        <div className="flex flex-col w-full px-4 md:px-6 lg:px-8">
-          <div className=" w-full">
+        <div className="w-full px-4 md:px-6 lg:px-8">
+          <div className="w-full flex flex-col justify-center">
             <div className="w-full flex items-center py-2 justify-between px-4">
               <SidebarTrigger />
               <ModeToggle />

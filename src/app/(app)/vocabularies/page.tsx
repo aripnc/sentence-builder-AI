@@ -30,7 +30,12 @@ import { CreateSentences } from "@/http/sentences/create-sentences";
 import { GenerateSentences } from "@/http/sentences/generate-sentences";
 import { CreateVocabulary } from "@/http/vocabulary/create-vocabulary";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Loader } from "lucide-react";
+import {
+  BrushCleaning,
+  IterationCcw,
+  IterationCcwIcon,
+  Loader,
+} from "lucide-react";
 import { useState } from "react";
 import { useTransition } from "react";
 import { useForm } from "react-hook-form";
@@ -67,7 +72,6 @@ export default function Vocabularies() {
 
     startTransition(async () => {
       const sentences = await GenerateSentences({ vocabulary, quantidade });
-
       setFrases(sentences!);
     });
   };
@@ -89,7 +93,7 @@ export default function Vocabularies() {
 
   return (
     <>
-      <div className="mt-20 w-[800px] border rounded-xl self-center py-3 px-4">
+      <div className=" w-[800px] border rounded-sm self-center py-10 px-4">
         <Form {...form}>
           <div>
             <form
@@ -168,9 +172,11 @@ export default function Vocabularies() {
                   type="submit"
                   disabled={isPending}
                 >
+                  <IterationCcwIcon size={16} />
                   {isPending ? "Gerando as frases" : "Gerar frases"}
                 </Button>
                 <Button size="lg" variant="outline" onClick={handleClear}>
+                  <BrushCleaning size={16} />
                   Clear
                 </Button>
               </div>
@@ -178,30 +184,30 @@ export default function Vocabularies() {
           </div>
         </Form>
       </div>
-      <div className="mt-10 w-[800px] self-center">
-        {isPending ? (
+      <div className="mt-10 w-[800px] self-center pb-6">
+        {isPending && (
           <Dialog open>
             <DialogContent>
-              <DialogTitle className="text-lg flex items-center gap-x-1">
-                Gerando frases <Loader className="animate-spin" />
+              <DialogTitle className="text-lg flex flex-col items-center">
+                <Loader className="animate-spin" size={45} />
+                Gerando frases
               </DialogTitle>
-              <DialogDescription>
+              <DialogDescription className="text-base text-center">
                 Estamos gerando as frases, por favor aguarde...
               </DialogDescription>
             </DialogContent>
           </Dialog>
-        ) : (
+        )}
+        {frases && (
           <div className="space-y-5">
             <Sentences frases={frases ?? []} />
-            {frases && (
-              <Button
-                className="w-full text-base"
-                variant="outline"
-                onClick={form.handleSubmit(handleSaveVocabulary)}
-              >
-                Salvar
-              </Button>
-            )}
+            <Button
+              className="w-full text-base"
+              variant="success"
+              onClick={form.handleSubmit(handleSaveVocabulary)}
+            >
+              Salvar
+            </Button>
           </div>
         )}
       </div>

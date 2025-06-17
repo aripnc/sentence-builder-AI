@@ -1,6 +1,6 @@
 import type { Vocabulary } from "@/@types/vocabulary";
+import { toast } from "@/hooks/use-toast";
 import { api } from "@/lib/axios";
-import { toast } from "sonner";
 
 type UpdateVocabularyRequest = {
   vocabulary: Vocabulary;
@@ -11,10 +11,14 @@ export async function updateVocabulary({
 }: UpdateVocabularyRequest) {
   try {
     await api.put("/vocabulary", { vocabulary });
-    toast.success("Vocabulario atualizado");
+    toast({
+      title: "Vocabulary atualizado!",
+      variant: "success",
+    });
   } catch (error) {
-    toast.error("Erro ao atualizar vocabulario", {
-      description: `${error}`,
+    toast({
+      title: "Erro ao atualizar vocabulary",
+      variant: "destructive",
     });
   }
 }

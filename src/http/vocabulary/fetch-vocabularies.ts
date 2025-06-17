@@ -1,7 +1,7 @@
 import type { Vocabulary } from "@/@types/vocabulary";
+import { toast } from "@/hooks/use-toast";
 import { api } from "@/lib/axios";
 import { queryOptions } from "@tanstack/react-query";
-import { toast } from "sonner";
 
 interface FetchVocabulariesResponse {
   data: Vocabulary[];
@@ -15,9 +15,10 @@ export async function FetchVocabularies() {
     return data.data;
   } catch (error) {
     console.error(error);
-    // toast.error("Erro ao buscar vocabularios", {
-    //   description: `${error}`,
-    // });
+    toast({
+      title: "Erro ao consultar vocabularies",
+      variant: "destructive",
+    });
   }
 }
 

@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Open_Sans } from "next/font/google";
 import "./globals.css";
 import "dotenv";
-import { Toaster } from "@/components/ui/sonner";
+import { Toaster } from "@/components/ui/toaster";
 import { Providers } from "@/providers/providers";
 
 const karla = Open_Sans({
@@ -23,7 +23,7 @@ export default function RootLayout({
     <html lang="en" className={karla.className} suppressHydrationWarning>
       <body>
         <Providers>{children}</Providers>
-        <Toaster theme="dark" position="top-right" />
+        <Toaster />
       </body>
     </html>
   );

@@ -1,6 +1,6 @@
 import type { SentenceChatProps } from "@/@types/sentence-chat";
+import { toast } from "@/hooks/use-toast";
 import { api } from "@/lib/axios";
-import { toast } from "sonner";
 
 interface GenerateSentencesRequest {
   vocabularyId: string;
@@ -16,10 +16,15 @@ export async function CreateSentences({
       vocabularyId,
       sentences,
     });
+    toast({
+      title: "Frases criadas com sucesso",
+      variant: "success",
+    });
   } catch (error) {
     console.error(error);
-    toast.error("Error ao gerar frases", {
-      description: `${error}`,
+    toast({
+      title: "Erro ao criar frases",
+      variant: "destructive",
     });
   }
 }
