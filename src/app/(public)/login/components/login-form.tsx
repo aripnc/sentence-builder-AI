@@ -17,8 +17,15 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { authClient } from "@/lib/auth-client";
 import { zodResolver } from "@hookform/resolvers/zod";
+import {
+  RiGithubFill,
+  RiGoogleFill,
+  RiQuestionAnswerFill,
+} from "@remixicon/react";
+import { GalleryVerticalEnd } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -64,19 +71,29 @@ export default function LoginForm() {
   };
 
   return (
-    <Card className="border-muted">
-      <CardHeader>
-        <CardTitle className="text-2xl">Login</CardTitle>
-        <CardDescription>Entre na sua conta</CardDescription>
-      </CardHeader>
-
-      <CardContent>
-        <Form {...form}>
+    <div className="flex flex-col items-center justify-center h-full">
+      <Form {...form}>
+        <form
+          onSubmit={form.handleSubmit(handleLogin)}
+          className="w-[500px] h-[500px]"
+        >
           <div className="flex flex-col gap-6">
-            <form
-              onSubmit={form.handleSubmit(handleLogin)}
-              className="space-y-8"
-            >
+            <div className="flex flex-col items-center gap-2">
+              <div className="flex size-8 items-center justify-center rounded-md">
+                <RiQuestionAnswerFill className="size-7" />
+              </div>
+              <h1 className="text-xl font-bold">Welcome to PhrasalMind.</h1>
+              <div className="text-center text-sm">
+                Don't have an account?{" "}
+                <a
+                  href="/signup"
+                  className="text-primary underline underline-offset-4"
+                >
+                  Sign up
+                </a>
+              </div>
+            </div>
+            <div className="flex flex-col gap-6">
               <FormField
                 control={form.control}
                 name="email"
@@ -118,41 +135,45 @@ export default function LoginForm() {
                 className="w-full text-base"
                 type="submit"
               >
-                Entrar
+                Login
               </Button>
-
               <div className="w-full text-center text-base text-destructive">
                 {error}
               </div>
-
-              <div className="space-y-3">
-                <div className="w-full flex items-center">
-                  <span className="w-full text-center font-semibold text-base">
-                    Ou continue com
-                  </span>
-                </div>
-                <Button
-                  variant="destructive"
-                  className="text-base text-white w-full"
-                  onClick={handleSignInWithGoogle}
-                >
-                  Entrar com Google
-                </Button>
-              </div>
-
-              <div className="text-center text-lg">
-                Não possui uma conta?{" "}
-                <a
-                  href="/signup"
-                  className="text-primary underline underline-offset-4"
-                >
-                  Cadastrar conta
-                </a>
-              </div>
-            </form>
+            </div>
+            <div className="after:border-border relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t">
+              <span className="bg-background text-muted-foreground relative z-10 px-2">
+                Or
+              </span>
+            </div>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <Button
+                className="w-full bg-[#DB4437] after:flex-1 hover:bg-[#DB4437]/80 text-base text-white"
+                onClick={handleSignInWithGoogle}
+              >
+                <span className="pointer-events-none me-2 flex-1">
+                  <RiGoogleFill
+                    className="opacity-60"
+                    size={16}
+                    aria-hidden="true"
+                  />
+                </span>
+                Login with Google
+              </Button>
+              <Button className="w-full bg-[#333333] text-white text-base after:flex-1 hover:bg-[#333333]/90">
+                <span className="pointer-events-none me-2 flex-1">
+                  <RiGithubFill
+                    className="opacity-60"
+                    size={16}
+                    aria-hidden="true"
+                  />
+                </span>
+                Login with GitHub
+              </Button>
+            </div>
           </div>
-        </Form>
-      </CardContent>
-    </Card>
+        </form>
+      </Form>
+    </div>
   );
 }
