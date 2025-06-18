@@ -21,6 +21,7 @@ import { Label } from "@/components/ui/label";
 import { authClient } from "@/lib/auth-client";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
+  RiDiscordFill,
   RiGithubFill,
   RiGoogleFill,
   RiQuestionAnswerFill,
@@ -64,8 +65,14 @@ export default function LoginForm() {
   };
 
   const handleSignInWithGoogle = async () => {
-    const data = await authClient.signIn.social({
+    await authClient.signIn.social({
       provider: "google",
+      callbackURL: "/dashboard",
+    });
+  };
+  const handleSignInWithDiscord = async () => {
+    await authClient.signIn.social({
+      provider: "discord",
       callbackURL: "/dashboard",
     });
   };
@@ -160,15 +167,18 @@ export default function LoginForm() {
                 </span>
                 Login with Google
               </Button>
-              <Button className="w-full bg-[#333333] text-white text-base after:flex-1 hover:bg-[#333333]/90">
+              <Button
+                onClick={handleSignInWithDiscord}
+                className="w-full bg-[#5865F2] text-white text-base after:flex-1 hover:bg-[#5865F2]/90"
+              >
                 <span className="pointer-events-none me-2 flex-1">
-                  <RiGithubFill
+                  <RiDiscordFill
                     className="opacity-60"
                     size={16}
                     aria-hidden="true"
                   />
                 </span>
-                Login with GitHub
+                Login with Discord
               </Button>
             </div>
           </div>

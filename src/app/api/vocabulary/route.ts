@@ -50,21 +50,19 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
   }
 
-  if (user) {
-    const vocabularies = await prisma.vocabulary.findMany({
-      where: {
-        userId: user.id,
-      },
-      orderBy: {
-        createdAt: "desc",
-      },
-      include: {
-        sentences: true,
-      },
-    });
+  const vocabularies = await prisma.vocabulary.findMany({
+    where: {
+      userId: user.id,
+    },
+    orderBy: {
+      createdAt: "desc",
+    },
+    include: {
+      sentences: true,
+    },
+  });
 
-    return NextResponse.json({ data: vocabularies });
-  }
+  return NextResponse.json({ data: vocabularies });
 }
 
 interface RequestUpdateProps {

@@ -1,5 +1,7 @@
 import type { SentenceChatProps } from "@/@types/sentence-chat";
+import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { headers } from "next/headers";
 import { type NextRequest, NextResponse } from "next/server";
 
 type RequestProps = {
@@ -26,10 +28,24 @@ export async function POST(req: NextRequest) {
 }
 
 export async function GET(req: NextRequest) {
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
+  const user = session?.user;
+
+  if (!user) {
+    return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+  }
+
   const data = await prisma.sentence.findMany({
     where: {
       nextReview: {
         lte: new Date(),
+      },
+      AND: {
+        vocabulary: {
+          userId: user.id,
+        },
       },
     },
     // take: 10
