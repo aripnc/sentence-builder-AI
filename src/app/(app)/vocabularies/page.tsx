@@ -29,6 +29,7 @@ import {
 import { CreateSentences } from "@/http/sentences/create-sentences";
 import { GenerateSentences } from "@/http/sentences/generate-sentences";
 import { CreateVocabulary } from "@/http/vocabulary/create-vocabulary";
+import { trpc } from "@/trpc-client/client";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   BrushCleaning,
@@ -46,7 +47,14 @@ import Sentences from "./components/sentences";
 
 const formSchema = z.object({
   vocabulary: z.string().nonempty({ message: "Insira um vocabulário" }),
-  tipo: z.string().nonempty({ message: "Selecione um tipo" }),
+  tipo: z.enum([
+    "Unknown",
+    "PhrasalVerb",
+    "Noun",
+    "Verb",
+    "Adjective",
+    "Adverb",
+  ]),
   quantidade: z.string().nonempty({
     message: "Selecione uma quantidade de frases a serem geradas",
   }),
@@ -54,35 +62,61 @@ const formSchema = z.object({
 
 export default function Vocabularies() {
   const [frases, setFrases] = useState<SentenceChatProps[] | null>(null);
+  const createVocabulary = trpc.createVocabulary.useMutation();
+  const generateSentences = trpc.generateSentences.useMutation();
 
-  const [isPending, startTransition] = useTransition();
+  // const [isPending, startTransition] = useTransition();
+  const [isPending, setIsPeding] = useState(false);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       vocabulary: "",
-      tipo: "",
+      tipo: "Unknown",
       quantidade: "",
     },
   });
 
-  const handleGenerate = async (data: z.infer<typeof formSchema>) => {
+  const handleGenerateSentences = async (data: z.infer<typeof formSchema>) => {
+    // setIsPeding(true);
     const { vocabulary, quantidade } = data;
     setFrases(null);
+    generateSentences.mutate(
+      {
+        vocabulary,
+        quantidade,
+      },
+      {
+        onSuccess: (data) => {
+          setFrases(data);
+        },
+        onError: (err) => {
+          console.log("Error ao gerar as frases:", err);
+        },
+      },
+    );
+    // setIsPeding(false);
 
-    startTransition(async () => {
-      const sentences = await GenerateSentences({ vocabulary, quantidade });
-      setFrases(sentences!);
-    });
+    // startTransition(async () => {
+    //   const sentences = await GenerateSentences({ vocabulary, quantidade });
+    //   setFrases(sentences!);
+    // });
   };
 
-  const handleSaveVocabulary = async (formData: z.infer<typeof formSchema>) => {
+  const handleSaveVocabularyAndSentences = async (
+    formData: z.infer<typeof formSchema>,
+  ) => {
     const { vocabulary, tipo } = formData;
-    const data = await CreateVocabulary({ vocabulary, tipo });
-    const vocabularyId = data?.id as string;
-    if (frases) {
-      await CreateSentences({ vocabularyId, sentences: frases });
-    }
+    createVocabulary.mutate({
+      description: vocabulary,
+      type: tipo,
+    });
+
+    // const data = await CreateVocabulary({ vocabulary, tipo });
+    // const vocabularyId = data?.id as string;
+    // if (frases) {
+    //   await CreateSentences({ vocabularyId, sentences: frases });
+    // }
     handleClear();
   };
 
@@ -97,7 +131,7 @@ export default function Vocabularies() {
         <Form {...form}>
           <div>
             <form
-              onSubmit={form.handleSubmit(handleGenerate)}
+              onSubmit={form.handleSubmit(handleGenerateSentences)}
               className="space-y-8"
             >
               <FormField
@@ -170,10 +204,12 @@ export default function Vocabularies() {
                   className="text-base"
                   size="lg"
                   type="submit"
-                  disabled={isPending}
+                  disabled={generateSentences.isPending}
                 >
                   <IterationCcwIcon size={16} />
-                  {isPending ? "Gerando as frases" : "Gerar frases"}
+                  {generateSentences.isPending
+                    ? "Gerando as frases"
+                    : "Gerar frases"}
                 </Button>
                 <Button size="lg" variant="outline" onClick={handleClear}>
                   <BrushCleaning size={16} />
@@ -185,7 +221,7 @@ export default function Vocabularies() {
         </Form>
       </div>
       <div className="mt-10 w-[800px] self-center pb-6">
-        {isPending && (
+        {generateSentences.isPending && (
           <Dialog open>
             <DialogContent>
               <DialogTitle className="text-lg flex flex-col items-center">
@@ -204,7 +240,7 @@ export default function Vocabularies() {
             <Button
               className="w-full text-base"
               variant="success"
-              onClick={form.handleSubmit(handleSaveVocabulary)}
+              onClick={form.handleSubmit(handleSaveVocabularyAndSentences)}
             >
               Salvar
             </Button>
