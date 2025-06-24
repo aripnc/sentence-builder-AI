@@ -1,10 +1,11 @@
 import { ThemeProvider } from "@/providers/theme-provider";
+import TRPCProvider from "@/trpc-client/trpc-provider";
 import type { ReactNode } from "react";
 import ReactQueryClientProvider from "./query-client-provider";
 
 export function Providers({ children }: { children: ReactNode }) {
   return (
-    <ReactQueryClientProvider>
+    <TRPCProvider>
       <ThemeProvider
         enableSystem
         attribute="class"
@@ -13,6 +14,6 @@ export function Providers({ children }: { children: ReactNode }) {
       >
         {children}
       </ThemeProvider>
-    </ReactQueryClientProvider>
+    </TRPCProvider>
   );
 }
