@@ -11,7 +11,7 @@ type RowActionsProps = {
 export default function RowActions({ vocabulary }: RowActionsProps) {
   return (
     <div className="flex gap-1">
-      <SentencesComponent sentences={vocabulary.sentences} />
+      <SentencesComponent vocabulary={vocabulary} />
       <EditForm vocabulary={vocabulary} />
     </div>
   );

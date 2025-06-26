@@ -1,43 +1,32 @@
 "use client";
 
-import type { SentenceProps } from "@/@types/vocabulary";
 import { Button } from "@/components/ui/button";
-import { FetchSentences } from "@/http/sentences/fetch-sentences";
-import { UpdateSentence } from "@/http/sentences/update-sentence";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { trpc } from "@/trpc-client/client";
 import dayjs from "dayjs";
 import { Eye, Frown, Smile, ThumbsUp } from "lucide-react";
 import { useState } from "react";
 
 export default function Review() {
-  const queryClient = useQueryClient();
-  const { data: sentences = [], isLoading } = useQuery({
-    queryKey: ["sentences"],
-    queryFn: FetchSentences,
-  });
-
-  const mutation = useMutation({
-    mutationFn: UpdateSentence,
+  const fetchSentencesToReview = trpc.fetchSentencesToReview.useQuery();
+  const updateSentence = trpc.updateSentence.useMutation({
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["sentences"] });
-    },
-    onError: (error) => {
-      console.log("Update error:", error);
+      fetchSentencesToReview.refetch();
     },
   });
 
   const rowsPerPage = 1;
   const [currentPage, setCurrentPage] = useState(1);
   const [showTranslation, setShowTranslation] = useState(false);
+  const dataLength = fetchSentencesToReview.data?.length ?? 0;
+  const sentencesToReview = fetchSentencesToReview.data ?? [];
 
   const currentSentence =
-    sentences.length > 0
-      ? sentences[(currentPage - 1) * rowsPerPage]
-      : sentences[1];
-  console.log(sentences);
+    dataLength > 0
+      ? sentencesToReview[(currentPage - 1) * rowsPerPage]
+      : sentencesToReview[1];
 
   const handleNext = () => {
-    if (currentPage < Math.ceil(sentences.length / rowsPerPage)) {
+    if (currentPage < Math.ceil(dataLength / rowsPerPage)) {
       setCurrentPage(currentPage + 1);
     } else {
       setCurrentPage(1);
@@ -46,6 +35,7 @@ export default function Review() {
   };
 
   const handleYes = async () => {
+    console.log(currentSentence);
     currentSentence.repetitions = currentSentence.repetitions + 1;
     currentSentence.fator = currentSentence.fator + 0.3;
 
@@ -62,32 +52,34 @@ export default function Review() {
         currentSentence.interval * currentSentence.fator;
     }
 
-    let nextReviewDate = dayjs(currentSentence.nextReview).format("DD/MM/YYYY");
+    // let nextReviewDate = dayjs(currentSentence.nextReview).format("DD/MM/YYYY");
     const now = new Date().getTime();
     const intervalInMilliseconds =
       currentSentence.interval * 24 * 60 * 60 * 1000;
-    nextReviewDate = new Date(now + intervalInMilliseconds).toISOString();
+    const nextReviewDate = new Date(now + intervalInMilliseconds);
     currentSentence.nextReview = nextReviewDate;
 
-    await mutation.mutateAsync({
-      sentence: currentSentence,
+    updateSentence.mutate({
+      ...currentSentence,
     });
+    console.log("nextReview", currentSentence.nextReview);
 
     handleNext();
   };
 
   const handleNo = async () => {
+    console.log(currentSentence);
     currentSentence.repetitions = 0;
     currentSentence.fator = 2.5;
     currentSentence.interval = 1;
 
     const now = new Date().getTime();
-    currentSentence.nextReview = new Date(now + 1).toISOString();
+    currentSentence.nextReview = new Date(now + 1);
 
-    await mutation.mutateAsync({
-      sentence: currentSentence,
+    updateSentence.mutate({
+      ...currentSentence,
     });
-    console.log(currentSentence);
+    console.log("nextReview", currentSentence.nextReview);
 
     handleNext();
   };
@@ -98,7 +90,7 @@ export default function Review() {
 
   return (
     <div>
-      {!sentences.length ? (
+      {!fetchSentencesToReview.data ? (
         <div className="flex flex-col mt-28 space-y-28 items-center justify-center">
           <div className="text-xl flex gap-2 items-center">
             Parabéns!! Você já revisou tudo por hoje{" "}
