@@ -75,24 +75,25 @@ export const appRouter = router({
   updateVocabulary: baseProcedure
     .input(
       z.object({
-        vocabularyId: z.string(),
-        difficulty: difficultyEnum,
-        type: typeEnum,
+        id: z.string(),
+        difficulty: difficultyEnum.optional(),
+        type: typeEnum.optional(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
       const data = await ctx.prisma.vocabulary.findUnique({
         where: {
-          id: input.vocabularyId,
+          id: input.id,
         },
       });
       const dataUpdated = await ctx.prisma.vocabulary.update({
         where: {
-          id: input.vocabularyId,
+          id: input.id,
         },
         data: {
           difficulty: input.difficulty ? input.difficulty : data?.difficulty,
           type: input.type ? input.type : data?.type,
+          updatedAt: new Date(),
         },
       });
       return dataUpdated;
@@ -135,6 +136,112 @@ export const appRouter = router({
 
       const sentences = JSON.parse(response || "");
       return sentences;
+    }),
+  createSentences: baseProcedure
+    .input(
+      z.object({
+        vocabularyId: z.string(),
+        sentences: z.array(
+          z.object({
+            frase: z.string(),
+            traducao: z.string(),
+          }),
+        ),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const mappedSentences = input.sentences.map((s) => {
+        return {
+          description: s.frase,
+          translation: s.traducao,
+          vocabularyId: input.vocabularyId,
+        };
+      });
+
+      await ctx.prisma.sentence.createMany({
+        data: [...mappedSentences],
+      });
+    }),
+  fetchSentencesToReview: baseProcedure
+    // .output(
+    //   z.array(
+    //     z.object({
+    //       description: z.string(),
+    //       translation: z.string(),
+    //       nextReview: z.date(),
+    //       interval: z.number(),
+    //       repetitions: z.number(),
+    //       fator: z.float64(),
+    //     }),
+    //   ),
+    // )
+    .query(async ({ ctx }) => {
+      const session = await auth.api.getSession({
+        headers: await headers(),
+      });
+      const user = session?.user;
+
+      const sentences = await ctx.prisma.sentence.findMany({
+        where: {
+          nextReview: {
+            lte: new Date(),
+          },
+          AND: {
+            vocabulary: {
+              userId: user?.id,
+            },
+          },
+        },
+      });
+
+      return sentences;
+    }),
+  fetchSentencesByVocabularyId: baseProcedure
+    .input(
+      z.object({
+        vocabularyId: z.string(),
+      }),
+    )
+    .output(
+      z.array(
+        z.object({
+          description: z.string(),
+          translation: z.string(),
+          nextReview: z.date(),
+          interval: z.number(),
+          repetitions: z.number(),
+          fator: z.float64(),
+        }),
+      ),
+    )
+    .query(async ({ ctx, input }) => {
+      const sentences = await ctx.prisma.sentence.findMany({
+        where: {
+          vocabularyId: input.vocabularyId,
+        },
+      });
+
+      return sentences;
+    }),
+  updateSentence: baseProcedure
+    .input(
+      z.object({
+        id: z.string(),
+        description: z.string(),
+        translation: z.string(),
+        nextReview: z.date(),
+        interval: z.number(),
+        repetitions: z.number(),
+        fator: z.float64(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      await ctx.prisma.sentence.update({
+        where: {
+          id: input.id,
+        },
+        data: input,
+      });
     }),
 });
 

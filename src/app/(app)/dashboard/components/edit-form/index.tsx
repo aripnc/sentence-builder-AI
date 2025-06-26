@@ -26,13 +26,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { updateVocabulary } from "@/http/vocabulary/update-vocabulary";
+import { trpc } from "@/trpc-client/client";
 import { zodResolver } from "@hookform/resolvers/zod";
-import {
-  queryOptions,
-  useMutation,
-  useQueryClient,
-} from "@tanstack/react-query";
 import { Edit2Icon } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
@@ -42,19 +37,35 @@ type EditFormProps = {
   vocabulary: Vocabulary;
 };
 
+const difficultyEnum = z.enum(["EASY", "MEDIUM", "HARD"]);
+const typeEnum = z.enum([
+  "Unknown",
+  "Noun",
+  "Verb",
+  "Adjective",
+  "Adverb",
+  "PhrasalVerb",
+]);
+
 const formSchema = z.object({
-  difficulty: z.string(),
-  type: z.string(),
+  difficulty: difficultyEnum,
+  type: typeEnum,
 });
 
 export default function EditForm({ vocabulary }: EditFormProps) {
+  const fetchVocabularies = trpc.fetchVocabularies.useQuery();
+  const updateVocabulary = trpc.updateVocabulary.useMutation({
+    onSettled: () => {
+      fetchVocabularies.refetch();
+    },
+  });
+
   const [isOpen, setIsOpen] = useState(false);
-  const queryClient = useQueryClient();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      difficulty: "",
-      type: "",
+      difficulty: vocabulary.difficulty,
+      type: vocabulary.type,
     },
   });
 
@@ -62,26 +73,13 @@ export default function EditForm({ vocabulary }: EditFormProps) {
   const difficulty = watch("difficulty");
   const type = watch("type");
 
-  const mutation = useMutation({
-    mutationFn: updateVocabulary,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["vocabulary"] });
-    },
-    onError: (error) => {
-      console.log("Update error:", error);
-    },
-  });
-
   async function onSubmit(values: z.infer<typeof formSchema>) {
     const { difficulty, type } = values;
-    const updatedVocabulary = {
+
+    updateVocabulary.mutate({
       ...vocabulary,
       difficulty,
       type,
-    };
-
-    await mutation.mutateAsync({
-      vocabulary: updatedVocabulary,
     });
 
     setIsOpen(false);

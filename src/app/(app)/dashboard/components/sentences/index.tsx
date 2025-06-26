@@ -1,5 +1,5 @@
 "use client";
-import type { SentenceProps } from "@/@types/vocabulary";
+import type { Vocabulary } from "@/@types/vocabulary";
 import {
   Accordion,
   AccordionContent,
@@ -13,13 +13,18 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { trpc } from "@/trpc-client/client";
 import { FileSearch } from "lucide-react";
 
 interface SentencesComponentProps {
-  sentences: SentenceProps[];
+  vocabulary: Vocabulary;
 }
 
-export function SentencesComponent({ sentences }: SentencesComponentProps) {
+export function SentencesComponent({ vocabulary }: SentencesComponentProps) {
+  const sentences = trpc.fetchSentencesByVocabularyId.useQuery({
+    vocabularyId: vocabulary.id,
+  });
+
   return (
     <div>
       <Dialog>
@@ -35,7 +40,7 @@ export function SentencesComponent({ sentences }: SentencesComponentProps) {
             collapsible
             className="w-full tracking-tight"
           >
-            {sentences.map((sentence, i) => (
+            {sentences.data?.map((sentence, i) => (
               <AccordionItem value={`item-${i}`} key={i}>
                 <AccordionTrigger className="text-lg font-semibold ">
                   {sentence.description}

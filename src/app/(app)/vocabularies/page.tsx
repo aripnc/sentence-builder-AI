@@ -5,14 +5,11 @@ import {
   Dialog,
   DialogContent,
   DialogDescription,
-  DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -26,24 +23,25 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { CreateSentences } from "@/http/sentences/create-sentences";
-import { GenerateSentences } from "@/http/sentences/generate-sentences";
-import { CreateVocabulary } from "@/http/vocabulary/create-vocabulary";
 import { trpc } from "@/trpc-client/client";
 import { zodResolver } from "@hookform/resolvers/zod";
-import {
-  BrushCleaning,
-  IterationCcw,
-  IterationCcwIcon,
-  Loader,
-} from "lucide-react";
+import { BrushCleaning, IterationCcwIcon, Loader } from "lucide-react";
 import { useState } from "react";
-import { useTransition } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { vocabulariesType } from "./components/helpers";
 import { sentencesQuantity } from "./components/helpers";
 import Sentences from "./components/sentences";
+// refactor dos toasts em cada requisição
+// import { toast } from "@/hooks/use-toast";
+//  toast({
+//       title: "Erro ao consultar frases",
+//       variant: "destructive",
+//     });
+// toast({
+//     title: "Frases criadas com sucesso",
+//     variant: "success",
+//   });
 
 const formSchema = z.object({
   vocabulary: z.string().nonempty({ message: "Insira um vocabulário" }),
@@ -64,9 +62,7 @@ export default function Vocabularies() {
   const [frases, setFrases] = useState<SentenceChatProps[] | null>(null);
   const createVocabulary = trpc.createVocabulary.useMutation();
   const generateSentences = trpc.generateSentences.useMutation();
-
-  // const [isPending, startTransition] = useTransition();
-  const [isPending, setIsPeding] = useState(false);
+  const createSentences = trpc.createSentences.useMutation();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -78,7 +74,6 @@ export default function Vocabularies() {
   });
 
   const handleGenerateSentences = async (data: z.infer<typeof formSchema>) => {
-    // setIsPeding(true);
     const { vocabulary, quantidade } = data;
     setFrases(null);
     generateSentences.mutate(
@@ -95,28 +90,26 @@ export default function Vocabularies() {
         },
       },
     );
-    // setIsPeding(false);
-
-    // startTransition(async () => {
-    //   const sentences = await GenerateSentences({ vocabulary, quantidade });
-    //   setFrases(sentences!);
-    // });
   };
 
   const handleSaveVocabularyAndSentences = async (
     formData: z.infer<typeof formSchema>,
   ) => {
     const { vocabulary, tipo } = formData;
-    createVocabulary.mutate({
-      description: vocabulary,
-      type: tipo,
-    });
-
-    // const data = await CreateVocabulary({ vocabulary, tipo });
-    // const vocabularyId = data?.id as string;
-    // if (frases) {
-    //   await CreateSentences({ vocabularyId, sentences: frases });
-    // }
+    createVocabulary.mutate(
+      {
+        description: vocabulary,
+        type: tipo,
+      },
+      {
+        onSuccess: (data) => {
+          createSentences.mutate({
+            vocabularyId: data.id,
+            sentences: frases!,
+          });
+        },
+      },
+    );
     handleClear();
   };
 

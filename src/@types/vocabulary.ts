@@ -11,7 +11,6 @@ export type SentenceProps = {
 export interface Vocabulary {
   id: string;
   description: string;
-  difficulty: string;
-  type: string;
-  sentences: SentenceProps[];
+  difficulty: "EASY" | "MEDIUM" | "HARD";
+  type: "Unknown" | "Noun" | "Verb" | "Adjective" | "Adverb" | "PhrasalVerb";
 }
