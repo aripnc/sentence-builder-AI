@@ -26,6 +26,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { toast } from "@/hooks/use-toast";
 import { trpc } from "@/trpc-client/client";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Edit2Icon } from "lucide-react";
@@ -57,6 +58,10 @@ export default function EditForm({ vocabulary }: EditFormProps) {
   const updateVocabulary = trpc.updateVocabulary.useMutation({
     onSettled: () => {
       fetchVocabularies.refetch();
+      toast({
+        title: "Vocabulario atualizado",
+        variant: "success",
+      });
     },
   });
 

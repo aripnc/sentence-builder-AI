@@ -23,6 +23,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { toast } from "@/hooks/use-toast";
 import { trpc } from "@/trpc-client/client";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { BrushCleaning, IterationCcwIcon, Loader } from "lucide-react";
@@ -32,16 +33,6 @@ import { z } from "zod";
 import { vocabulariesType } from "./components/helpers";
 import { sentencesQuantity } from "./components/helpers";
 import Sentences from "./components/sentences";
-// refactor dos toasts em cada requisição
-// import { toast } from "@/hooks/use-toast";
-//  toast({
-//       title: "Erro ao consultar frases",
-//       variant: "destructive",
-//     });
-// toast({
-//     title: "Frases criadas com sucesso",
-//     variant: "success",
-//   });
 
 const formSchema = z.object({
   vocabulary: z.string().nonempty({ message: "Insira um vocabulário" }),
@@ -84,9 +75,17 @@ export default function Vocabularies() {
       {
         onSuccess: (data) => {
           setFrases(data);
+          toast({
+            title: "Frases geradas com sucesso",
+            variant: "success",
+          });
         },
         onError: (err) => {
           console.log("Error ao gerar as frases:", err);
+          toast({
+            title: "Error ao gerar as frases",
+            variant: "destructive",
+          });
         },
       },
     );
@@ -106,6 +105,16 @@ export default function Vocabularies() {
           createSentences.mutate({
             vocabularyId: data.id,
             sentences: frases!,
+          });
+          toast({
+            title: "Vocabulario e frases salvas",
+            variant: "success",
+          });
+        },
+        onError: (data) => {
+          toast({
+            title: "Error ao salvar vocabulario e frases",
+            variant: "destructive",
           });
         },
       },
