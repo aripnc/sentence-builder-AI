@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/sidebar";
 import { authClient } from "@/lib/auth-client";
 import { RiQuestionAnswerFill } from "@remixicon/react";
-import { FolderHeart, Home, SquareRoundCorner } from "lucide-react";
+import { Home, HousePlus, SmilePlus } from "lucide-react";
 import { redirect, usePathname } from "next/navigation";
 import { NavUser } from "./nav-user";
 
@@ -38,17 +38,12 @@ const data = {
         {
           title: "Nova Palavra",
           url: "/vocabularies",
-          icon: SquareRoundCorner,
+          icon: HousePlus,
         },
         {
           title: "Revisar",
           url: "/review",
-          icon: SquareRoundCorner,
-        },
-        {
-          title: "Favoritos",
-          url: "/words",
-          icon: FolderHeart,
+          icon: SmilePlus,
         },
       ],
     },

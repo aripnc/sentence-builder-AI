@@ -1,8 +1,6 @@
 "use client";
-
 import { Button } from "@/components/ui/button";
 import { trpc } from "@/trpc-client/client";
-import dayjs from "dayjs";
 import { Eye, Frown, Smile, ThumbsUp } from "lucide-react";
 import { useState } from "react";
 
@@ -21,9 +19,7 @@ export default function Review() {
   const sentencesToReview = fetchSentencesToReview.data ?? [];
 
   const currentSentence =
-    dataLength > 0
-      ? sentencesToReview[(currentPage - 1) * rowsPerPage]
-      : sentencesToReview[1];
+    dataLength > 0 ? sentencesToReview[(currentPage - 1) * rowsPerPage] : null;
 
   const handleNext = () => {
     if (currentPage < Math.ceil(dataLength / rowsPerPage)) {
@@ -35,6 +31,7 @@ export default function Review() {
   };
 
   const handleYes = async () => {
+    if (!currentSentence) return;
     console.log(currentSentence);
     currentSentence.repetitions = currentSentence.repetitions + 1;
     currentSentence.fator = currentSentence.fator + 0.3;
@@ -52,7 +49,6 @@ export default function Review() {
         currentSentence.interval * currentSentence.fator;
     }
 
-    // let nextReviewDate = dayjs(currentSentence.nextReview).format("DD/MM/YYYY");
     const now = new Date().getTime();
     const intervalInMilliseconds =
       currentSentence.interval * 24 * 60 * 60 * 1000;
@@ -62,12 +58,12 @@ export default function Review() {
     updateSentence.mutate({
       ...currentSentence,
     });
-    console.log("nextReview", currentSentence.nextReview);
 
     handleNext();
   };
 
   const handleNo = async () => {
+    if (!currentSentence) return;
     console.log(currentSentence);
     currentSentence.repetitions = 0;
     currentSentence.fator = 2.5;
@@ -79,7 +75,6 @@ export default function Review() {
     updateSentence.mutate({
       ...currentSentence,
     });
-    console.log("nextReview", currentSentence.nextReview);
 
     handleNext();
   };
@@ -90,7 +85,7 @@ export default function Review() {
 
   return (
     <div>
-      {!fetchSentencesToReview.data ? (
+      {!currentSentence ? (
         <div className="flex flex-col mt-28 space-y-28 items-center justify-center">
           <div className="text-xl flex gap-2 items-center">
             Parabéns!! Você já revisou tudo por hoje{" "}
