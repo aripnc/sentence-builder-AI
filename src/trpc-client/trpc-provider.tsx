@@ -5,6 +5,7 @@ import type React from "react";
 import { useState } from "react";
 import superjson from "superjson";
 import { trpc } from "./client";
+// "http://localhost:3000/api/trpc",
 
 export default function TRPCProvider({
   children,
@@ -14,7 +15,7 @@ export default function TRPCProvider({
     trpc.createClient({
       links: [
         httpBatchLink({
-          url: "http://localhost:3000/api/trpc",
+          url: "https://sentence-builder-ai.vercel.app/api/trpc",
           transformer: superjson,
         }),
       ],
