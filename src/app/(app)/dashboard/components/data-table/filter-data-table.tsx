@@ -13,6 +13,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { classificacaoHelper, dificultyHelper } from "@/helpers";
 import type { Table as ReactTable } from "@tanstack/react-table";
 import { BrushCleaning } from "lucide-react";
 import { useState } from "react";
@@ -20,16 +21,6 @@ import { useState } from "react";
 interface FilterDataTableProps<TData> {
   table: ReactTable<TData>;
 }
-
-const dificuldades = ["MEDIUM", "HARD", "EASY"];
-const classificacoes = [
-  "Unknown",
-  "PhrasalVerb",
-  "Noun",
-  "Verb",
-  "Adjective",
-  "Adverb",
-];
 
 export function FilterDataTable<TData>({ table }: FilterDataTableProps<TData>) {
   const [openDificuldade, setDificuldadeOpen] = useState(false);
@@ -51,19 +42,20 @@ export function FilterDataTable<TData>({ table }: FilterDataTableProps<TData>) {
             <CommandList>
               <CommandEmpty>No results found.</CommandEmpty>
               <CommandGroup>
-                {dificuldades.map((d, i) => (
+                {dificultyHelper.map((d, i) => (
                   <CommandItem
                     key={i}
-                    value={d}
+                    value={d.value}
                     onSelect={(value) => {
                       setDificuldade(
-                        dificuldades.find((d) => d === value) || null,
+                        dificultyHelper.filter((d) => d.value === value)[0]
+                          .value || null,
                       );
-                      table.getColumn("difficulty")?.setFilterValue(d);
+                      table.getColumn("difficulty")?.setFilterValue(d.value);
                       setDificuldadeOpen(false);
                     }}
                   >
-                    {d}
+                    {d.value}
                   </CommandItem>
                 ))}
               </CommandGroup>
@@ -84,19 +76,20 @@ export function FilterDataTable<TData>({ table }: FilterDataTableProps<TData>) {
             <CommandList>
               <CommandEmpty>No results found.</CommandEmpty>
               <CommandGroup>
-                {classificacoes.map((c, i) => (
+                {classificacaoHelper.map((c, i) => (
                   <CommandItem
                     key={i}
-                    value={c}
+                    value={c.value}
                     onSelect={(value) => {
                       setClassificacao(
-                        classificacoes.find((c) => c === value) || null,
+                        classificacaoHelper.filter((c) => c.value === value)[0]
+                          .value || null,
                       );
-                      table.getColumn("type")?.setFilterValue(c);
+                      table.getColumn("type")?.setFilterValue(c.value);
                       setClassificacaoOpen(false);
                     }}
                   >
-                    {c}
+                    {c.value}
                   </CommandItem>
                 ))}
               </CommandGroup>

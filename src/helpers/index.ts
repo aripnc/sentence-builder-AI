@@ -1,4 +1,4 @@
-export const vocabulariesType = [
+export const classificacaoHelper = [
   { value: "Unknown", name: "Não informar" },
   { value: "PhrasalVerb", name: "Frase Verbal" },
   { value: "Noun", name: "Substântivo" },
@@ -7,7 +7,7 @@ export const vocabulariesType = [
   { value: "Adverb", name: "Advérbio" },
 ];
 
-export const vocabulariesDifficulty = [
+export const dificultyHelper = [
   { value: "MEDIUM", name: "Médio" },
   { value: "EASY", name: "Fácil" },
   { value: "HARD", name: "Difícil" },

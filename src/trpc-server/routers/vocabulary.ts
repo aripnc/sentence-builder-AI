@@ -1,24 +1,15 @@
+import { classificacaoSchema, dificultySchema } from "@/contracts";
 import { auth } from "@/lib/auth";
 import { baseProcedure, router } from "@/trpc-server/init";
 import { headers } from "next/headers";
 import z from "zod";
-
-const difficultyEnum = z.enum(["EASY", "MEDIUM", "HARD"]);
-const typeEnum = z.enum([
-  "Unknown",
-  "Noun",
-  "Verb",
-  "Adjective",
-  "Adverb",
-  "PhrasalVerb",
-]);
 
 export const vocabularyRouter = router({
   createVocabulary: baseProcedure
     .input(
       z.object({
         description: z.string(),
-        type: typeEnum,
+        type: classificacaoSchema,
       }),
     )
     .mutation(async ({ ctx, input }) => {
@@ -43,8 +34,8 @@ export const vocabularyRouter = router({
         z.object({
           id: z.string(),
           description: z.string(),
-          difficulty: difficultyEnum,
-          type: typeEnum,
+          difficulty: dificultySchema,
+          type: classificacaoSchema,
           createdAt: z.date(),
           updatedAt: z.date(),
         }),
@@ -69,8 +60,8 @@ export const vocabularyRouter = router({
     .input(
       z.object({
         id: z.string(),
-        difficulty: difficultyEnum.optional(),
-        type: typeEnum.optional(),
+        difficulty: dificultySchema.optional(),
+        type: classificacaoSchema.optional(),
       }),
     )
     .mutation(async ({ ctx, input }) => {

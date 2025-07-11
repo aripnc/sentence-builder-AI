@@ -1,7 +1,5 @@
 "use client";
 import type { Vocabulary } from "@/@types/vocabulary";
-import { vocabulariesType } from "@/app/(app)/vocabularies/components/helpers";
-import { vocabulariesDifficulty } from "@/app/(app)/vocabularies/components/helpers";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -26,6 +24,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { classificacaoSchema, dificultySchema } from "@/contracts";
+import { classificacaoHelper, dificultyHelper } from "@/helpers";
 import { toast } from "@/hooks/use-toast";
 import { trpc } from "@/trpc-client/client";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -38,15 +38,8 @@ type EditFormProps = {
   vocabulary: Vocabulary;
 };
 
-const difficultyEnum = z.enum(["EASY", "MEDIUM", "HARD"]);
-const typeEnum = z.enum([
-  "Unknown",
-  "Noun",
-  "Verb",
-  "Adjective",
-  "Adverb",
-  "PhrasalVerb",
-]);
+const difficultyEnum = dificultySchema;
+const typeEnum = classificacaoSchema;
 
 const formSchema = z.object({
   difficulty: difficultyEnum,
@@ -126,7 +119,7 @@ export default function EditForm({ vocabulary }: EditFormProps) {
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        {vocabulariesDifficulty.map((d, i) => (
+                        {dificultyHelper.map((d, i) => (
                           <SelectItem key={i} value={d.value}>
                             {d.name}
                           </SelectItem>
@@ -155,7 +148,7 @@ export default function EditForm({ vocabulary }: EditFormProps) {
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        {vocabulariesType.map((v, i) => (
+                        {classificacaoHelper.map((v, i) => (
                           <SelectItem key={i} value={v.value}>
                             {v.name}
                           </SelectItem>

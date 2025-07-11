@@ -23,6 +23,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { classificacaoSchema } from "@/contracts";
+import { classificacaoHelper, sentencesQuantity } from "@/helpers";
 import { toast } from "@/hooks/use-toast";
 import { trpc } from "@/trpc-client/client";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -30,20 +32,11 @@ import { BrushCleaning, IterationCcwIcon, Loader } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { vocabulariesType } from "./components/helpers";
-import { sentencesQuantity } from "./components/helpers";
 import Sentences from "./components/sentences";
 
 const formSchema = z.object({
   vocabulary: z.string().nonempty({ message: "Insira um vocabulário" }),
-  tipo: z.enum([
-    "Unknown",
-    "PhrasalVerb",
-    "Noun",
-    "Verb",
-    "Adjective",
-    "Adverb",
-  ]),
+  tipo: classificacaoSchema,
   quantidade: z.string().nonempty({
     message: "Selecione uma quantidade de frases a serem geradas",
   }),
@@ -165,7 +158,7 @@ export default function Vocabularies() {
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        {vocabulariesType.map((v, i) => (
+                        {classificacaoHelper.map((v, i) => (
                           <SelectItem key={i} value={v.value}>
                             {v.name}
                           </SelectItem>

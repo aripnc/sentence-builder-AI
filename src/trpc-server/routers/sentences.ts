@@ -5,6 +5,16 @@ import * as z from "zod/v4";
 
 import OpenAI from "openai";
 
+const sentenceSchema = z.object({
+  id: z.string(),
+  description: z.string(),
+  translation: z.string(),
+  nextReview: z.date(),
+  interval: z.number(),
+  repetitions: z.number(),
+  fator: z.float64(),
+});
+
 const openai = new OpenAI({
   baseURL: "https://openrouter.ai/api/v1",
   apiKey: process.env.OPENAI_KEY,
@@ -102,18 +112,7 @@ export const sentenceRouter = router({
         vocabularyId: z.string(),
       }),
     )
-    .output(
-      z.array(
-        z.object({
-          description: z.string(),
-          translation: z.string(),
-          nextReview: z.date(),
-          interval: z.number(),
-          repetitions: z.number(),
-          fator: z.float64(),
-        }),
-      ),
-    )
+    .output(z.array(sentenceSchema))
     .query(async ({ ctx, input }) => {
       const sentences = await ctx.prisma.sentence.findMany({
         where: {
@@ -124,17 +123,7 @@ export const sentenceRouter = router({
       return sentences;
     }),
   updateSentence: baseProcedure
-    .input(
-      z.object({
-        id: z.string(),
-        description: z.string(),
-        translation: z.string(),
-        nextReview: z.date(),
-        interval: z.number(),
-        repetitions: z.number(),
-        fator: z.float64(),
-      }),
-    )
+    .input(sentenceSchema)
     .mutation(async ({ ctx, input }) => {
       await ctx.prisma.sentence.update({
         where: {
