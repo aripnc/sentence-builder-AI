@@ -1,5 +1,4 @@
 import { type NextRequest, NextResponse } from "next/server";
-// const authtoken = req.cookies.get("better-auth.session_token");
 
 const publicRoutes = [
   { path: "/login", whenAuthenticated: "redirect" },
@@ -19,7 +18,8 @@ export function middleware(req: NextRequest) {
     (route) => route.path === currentPath,
   );
 
-  const authtoken = req.cookies.get("__Secure-better-auth.session_token");
+  // const authtoken = req.cookies.get("__Secure-better-auth.session_token");
+  const authtoken = req.cookies.get("better-auth.session_token");
 
   if (!authtoken && isPublicRoute) {
     return NextResponse.next();

@@ -6,7 +6,6 @@
 
 generator client {
   provider = "prisma-client-js"
-  output   = "../src/generated/prisma"
 }
 
 datasource db {
@@ -15,7 +14,7 @@ datasource db {
 }
 
 model User {
-  id String @id @default(uuid())
+  id            String    @id
   name          String
   email         String
   emailVerified Boolean
@@ -24,15 +23,14 @@ model User {
   updatedAt     DateTime
   sessions      Session[]
   accounts      Account[]
-
-  vocabularys Vocabulary[]
+  Vocabulary Vocabulary[]
 
   @@unique([email])
   @@map("user")
 }
 
 model Session {
- id String @id @default(uuid())
+  id        String   @id
   expiresAt DateTime
   token     String
   createdAt DateTime
@@ -47,7 +45,7 @@ model Session {
 }
 
 model Account {
-  id String @id @default(uuid())
+  id                    String    @id
   accountId             String
   providerId            String
   userId                String
@@ -122,6 +120,5 @@ model Sentence{
   fator Float @default(2.5)
 
   @@map("sentences")
-
 
 }

@@ -1,0 +1,53 @@
+
+services:
+  next-app:
+     container_name: next-app
+     build:
+       context: .
+       dockerfile: Dockerfile
+    #  env_file: 
+    #    - .env   
+     volumes:
+        - ./src:/app/src
+     restart: always
+     ports:
+       - 3000:3000    
+     environment:
+        - DATABASE_URL=postgresql://postgres:postgres@db-postgres:5432/generator?schema=public
+        - NEXT_PUBLIC_API_URL=http://localhost:3000/api
+        - BETTER_AUTH_SECRET=nVLBojuGPOsWKhKjrgzNTDuXNIUs8Bv4
+        - BETTER_AUTH_URL=http://localhost:3000
+        - NEXT_PUBLIC_URL=http://localhost:3000
+        - GOOGLE_CLIENT_ID=16527275397-e8kho563lk4frndbq7ekoaid0dvc5a2n.apps.googleusercontent.com 
+        - GOOGLE_CLIENT_SECRET=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
+        - DISCORD_CLIENT_ID=1384695664562278534
+        - DISCORD_CLIENT_SECRET=ahj3myAM_-12VX9QPKbhH0kVNg1gCsp1
+        - OPENAI_KEY=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 
+     networks:
+       - next_app_network   
+     depends_on:
+       - db-postgres
+           
+
+  db-postgres:
+    container_name: db-postgres
+    image: postgres:16.10-alpine3.21
+    restart: always
+    environment:
+        ALLOW_EMPTY_PASSWORD: yes
+        POSTGRES_PASSWORD: postgres
+        POSTGRES_USER: postgres
+        POSTGRES_DB: generator 
+    volumes:
+      - db-app:/var/lib/postgresql/data
+    ports:
+      - 5433:5432
+    networks:
+      - next_app_network
+      
+volumes:
+  db-app:
+
+networks:
+  next_app_network:
+     driver: bridge
